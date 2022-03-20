@@ -39,5 +39,22 @@
         <argument
             android:name="categoryName"
             app:argType="string" />
+        <action
+            android:id="@+id/action_topicFragment_to_setsFragment"
+            app:destination="@id/setsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/setsFragment"
+        android:name="ashutosh.jharkhand.regionallanguageadminapp.screens.SetsFragment"
+        android:label="{topicName}" >
+        <argument
+            android:name="topic"
+            app:argType="ashutosh.jharkhand.regionallanguageadminapp.models.Topic" />
+        <argument
+            android:name="category"
+            app:argType="ashutosh.jharkhand.regionallanguageadminapp.models.Category" />
+        <argument
+            android:name="topicName"
+            app:argType="string" />
     </fragment>
 </navigation>

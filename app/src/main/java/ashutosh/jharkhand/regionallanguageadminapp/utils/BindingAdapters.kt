@@ -7,8 +7,10 @@ import android.widget.Toast
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ashutosh.jharkhand.regionallanguageadminapp.adapters.CategoryAdapter
+import ashutosh.jharkhand.regionallanguageadminapp.adapters.SetsAdapter
 import ashutosh.jharkhand.regionallanguageadminapp.adapters.TopicAdapter
 import ashutosh.jharkhand.regionallanguageadminapp.models.Category
+import ashutosh.jharkhand.regionallanguageadminapp.models.Set
 import ashutosh.jharkhand.regionallanguageadminapp.models.Topic
 
 
@@ -31,6 +33,17 @@ fun listTopics(recyclerView: RecyclerView, topics: List<Topic>?){
     if (topics != null){
         val adapter = recyclerView.adapter as TopicAdapter
         adapter.setData(topics)
+    }
+}
+
+/**
+ *  Sets Fragment
+ */
+@BindingAdapter("listSets")
+fun listSets(recyclerView: RecyclerView, sets: List<Set>?){
+    if (sets != null){
+        val adapter = recyclerView.adapter as SetsAdapter
+        adapter.setData(sets)
     }
 }
 

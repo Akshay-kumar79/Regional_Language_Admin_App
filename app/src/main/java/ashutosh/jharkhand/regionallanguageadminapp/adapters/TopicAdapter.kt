@@ -8,7 +8,8 @@ import ashutosh.jharkhand.regionallanguageadminapp.databinding.ListItemTopicBind
 import ashutosh.jharkhand.regionallanguageadminapp.models.Topic
 import ashutosh.jharkhand.regionallanguageadminapp.utils.decodeImage
 
-class TopicAdapter(private val categoryImage: String): RecyclerView.Adapter<TopicAdapter.ViewHolder>() {
+class TopicAdapter(private val categoryImage: String, private val topicClickListener: TopicClickListener)
+    : RecyclerView.Adapter<TopicAdapter.ViewHolder>() {
 
     private var topics: List<Topic> = ArrayList()
 
@@ -22,7 +23,7 @@ class TopicAdapter(private val categoryImage: String): RecyclerView.Adapter<Topi
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(topics[position], categoryImage)
+        holder.bind(topics[position], categoryImage, topicClickListener)
     }
 
     override fun getItemCount(): Int {
@@ -38,7 +39,9 @@ class TopicAdapter(private val categoryImage: String): RecyclerView.Adapter<Topi
             }
         }
 
-        fun bind(topic: Topic, categoryImage: String){
+        fun bind(topic: Topic, categoryImage: String, topicClickListener: TopicClickListener){
+            binding.topic = topic
+            binding.topicClickListener = topicClickListener
             binding.topicName.text = topic.topicName
             if (categoryImage.isNotEmpty()) {
                 binding.topicImage.setImageBitmap(decodeImage(categoryImage))
@@ -46,5 +49,8 @@ class TopicAdapter(private val categoryImage: String): RecyclerView.Adapter<Topi
             binding.executePendingBindings()
         }
     }
+}
 
+class TopicClickListener(val clickListener: (topic: Topic) -> Unit){
+    fun onClick(topic: Topic) = clickListener(topic)
 }

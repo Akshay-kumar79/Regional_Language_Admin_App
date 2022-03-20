@@ -9,4 +9,7 @@ object Constants {
     const val TOPIC_COLLECTION = "topics"
     const val TOPIC_NAME_FIELD = "topic_name"
 
+    const val SET_COLLECTION = "sets"
+    const val SET_NUMBER_FIELD = "set_number"
+
 }

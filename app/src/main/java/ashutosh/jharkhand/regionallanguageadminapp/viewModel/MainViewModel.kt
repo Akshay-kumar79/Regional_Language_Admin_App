@@ -6,13 +6,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import ashutosh.jharkhand.regionallanguageadminapp.models.Category
+import ashutosh.jharkhand.regionallanguageadminapp.models.Set
 import ashutosh.jharkhand.regionallanguageadminapp.models.Topic
 import ashutosh.jharkhand.regionallanguageadminapp.utils.Constants
 import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlin.collections.ArrayList
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -28,11 +29,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _currentTopics = MutableLiveData<List<Topic>>()
     val currentTopics: LiveData<List<Topic>>
-    get() = _currentTopics
+        get() = _currentTopics
+
+    private val _currentSets = MutableLiveData<List<Set>>()
+    val currentSets: LiveData<List<Set>>
+        get() = _currentSets
 
     val categoryNameToAddCategory = MutableLiveData<String>()
 
-    private val topicChangeEventListener = EventListener<QuerySnapshot>{snapshot, error ->
+    private val topicChangeEventListener = EventListener<QuerySnapshot> { snapshot, error ->
         if (error != null) {
             Toast.makeText(getApplication(), error.message, Toast.LENGTH_SHORT).show()
             return@EventListener
@@ -53,6 +58,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private val setChangeEventListener = EventListener<QuerySnapshot> { snapshot, error ->
+        if (error != null) {
+            Toast.makeText(getApplication(), error.message, Toast.LENGTH_SHORT).show()
+            return@EventListener
+        }
+
+        if (snapshot != null) {
+            val newSets = ArrayList<Set>()
+            val documents = snapshot.documents
+            for (document in documents) {
+                newSets.add(Set(document.id, (document.get(Constants.SET_NUMBER_FIELD) as Long?)?.toInt() ?: 0))
+            }
+            _currentSets.value = newSets
+        }
+    }
+
+
     init {
         getRealtimeCategories()
     }
@@ -62,9 +84,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             .addSnapshotListener(topicChangeEventListener)
     }
 
+    fun updateSets(categoryId: String, topicId: String) {
+        db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId).collection(Constants.TOPIC_COLLECTION)
+            .document(topicId).collection(Constants.SET_COLLECTION)
+            .orderBy(Constants.SET_NUMBER_FIELD, Query.Direction.ASCENDING)
+            .addSnapshotListener(setChangeEventListener)
+    }
+
     fun removeTopicSnapshotListener(categoryId: String) {
         db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId).collection(Constants.TOPIC_COLLECTION)
             .addSnapshotListener(topicChangeEventListener).remove()
+    }
+
+    fun removeSetSnapshotListener(categoryId: String, topicId: String) {
+        db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId).collection(Constants.TOPIC_COLLECTION)
+            .document(topicId).collection(Constants.SET_COLLECTION)
+            .addSnapshotListener(setChangeEventListener).remove()
     }
 
     private fun getRealtimeCategories() {
@@ -134,5 +169,43 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun addNewTopicToFirebase(categoryId: String, topicName: String) {
+        if (topicName.isEmpty()) {
+            Toast.makeText(getApplication(), "Invalid Topic Name!! try again", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val topic = hashMapOf(Constants.TOPIC_NAME_FIELD to topicName)
+
+        db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId)
+            .collection(Constants.TOPIC_COLLECTION)
+            .add(topic)
+            .addOnSuccessListener {
+                Toast.makeText(getApplication(), "Successfully added", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(getApplication(), "Failed to add topic", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    fun addNewSetToFirebase(categoryId: String, topicId: String, setNumberString: String) {
+        if (setNumberString.isEmpty()){
+            Toast.makeText(getApplication(), "Invalid Set Number!! try again", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val set = hashMapOf(Constants.SET_NUMBER_FIELD to setNumberString.toInt())
+
+        db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId)
+            .collection(Constants.TOPIC_COLLECTION).document(topicId)
+            .collection(Constants.SET_COLLECTION)
+            .add(set)
+            .addOnSuccessListener {
+                Toast.makeText(getApplication(), "Successfully added", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(getApplication(), "Failed to add set", Toast.LENGTH_SHORT).show()
+            }
+    }
 
 }
