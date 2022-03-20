@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph.xml"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="ashutosh.jharkhand.regionallanguageadminapp.screens.MainFragment"
+        android:label="Categories" >
+        <action
+            android:id="@+id/action_mainFragment_to_addCategoryFragment"
+            app:destination="@id/addCategoryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addCategoryFragment"
+        android:name="ashutosh.jharkhand.regionallanguageadminapp.screens.AddCategoryFragment"
+        android:label="Add Category"
+        tools:layout="@layout/fragment_add_category" >
+        <action
+            android:id="@+id/action_addCategoryFragment_to_iconSelectFragment"
+            app:destination="@id/iconSelectFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/iconSelectFragment"
+        android:name="ashutosh.jharkhand.regionallanguageadminapp.screens.IconSelectFragment"
+        android:label="Select Icon" />
+</navigation>
