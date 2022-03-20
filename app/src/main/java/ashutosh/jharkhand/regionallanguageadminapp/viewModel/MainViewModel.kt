@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import ashutosh.jharkhand.regionallanguageadminapp.models.Category
+import ashutosh.jharkhand.regionallanguageadminapp.models.Question
 import ashutosh.jharkhand.regionallanguageadminapp.models.Set
 import ashutosh.jharkhand.regionallanguageadminapp.models.Topic
 import ashutosh.jharkhand.regionallanguageadminapp.utils.Constants
@@ -35,7 +36,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val currentSets: LiveData<List<Set>>
         get() = _currentSets
 
+    private val _currentQuestion = MutableLiveData<List<Question>>()
+    val currentQuestion: LiveData<List<Question>>
+        get() = _currentQuestion
+
     val categoryNameToAddCategory = MutableLiveData<String>()
+
+    val question = MutableLiveData<String>()
+    val option1 = MutableLiveData<String>()
+    val option2 = MutableLiveData<String>()
+    val option3 = MutableLiveData<String>()
+    val option4 = MutableLiveData<String>()
+    val correctAnswer = MutableLiveData<Int>()
 
     private val topicChangeEventListener = EventListener<QuerySnapshot> { snapshot, error ->
         if (error != null) {
@@ -74,6 +86,31 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private val questionChangeEventListener = EventListener<QuerySnapshot> { snapshot, error ->
+        if (error != null) {
+            Toast.makeText(getApplication(), error.message, Toast.LENGTH_SHORT).show()
+            return@EventListener
+        }
+
+        if (snapshot != null) {
+            val newQuestions = ArrayList<Question>()
+            val documents = snapshot.documents
+            for (document in documents) {
+                newQuestions.add(
+                    Question(
+                        document.id,
+                        document.getString(Constants.QUESTION_QUESTION_FIELD)?: "",
+                        document.getString(Constants.QUESTION_OPTION_1_FIELD)?: "",
+                        document.getString(Constants.QUESTION_OPTION_2_FIELD)?: "",
+                        document.getString(Constants.QUESTION_OPTION_3_FIELD)?: "",
+                        document.getString(Constants.QUESTION_OPTION_4_FIELD)?: "",
+                        (document.get(Constants.QUESTION_CORRECT_ANSWER_FIELD) as Long?)?.toInt() ?: 0,
+                    )
+                )
+            }
+            _currentQuestion.value = newQuestions
+        }
+    }
 
     init {
         getRealtimeCategories()
@@ -85,10 +122,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateSets(categoryId: String, topicId: String) {
-        db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId).collection(Constants.TOPIC_COLLECTION)
-            .document(topicId).collection(Constants.SET_COLLECTION)
+        db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId)
+            .collection(Constants.TOPIC_COLLECTION).document(topicId)
+            .collection(Constants.SET_COLLECTION)
             .orderBy(Constants.SET_NUMBER_FIELD, Query.Direction.ASCENDING)
             .addSnapshotListener(setChangeEventListener)
+    }
+
+    fun updateQuestions(categoryId: String, topicId: String, setId: String) {
+        db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId)
+            .collection(Constants.TOPIC_COLLECTION).document(topicId)
+            .collection(Constants.SET_COLLECTION).document(setId)
+            .collection(Constants.QUESTION_COLLECTION)
+            .addSnapshotListener(questionChangeEventListener)
     }
 
     fun removeTopicSnapshotListener(categoryId: String) {
@@ -100,6 +146,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId).collection(Constants.TOPIC_COLLECTION)
             .document(topicId).collection(Constants.SET_COLLECTION)
             .addSnapshotListener(setChangeEventListener).remove()
+    }
+
+    fun removeQuestionSnapshotListener(categoryId: String, topicId: String, setId: String) {
+        db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId)
+            .collection(Constants.TOPIC_COLLECTION).document(topicId)
+            .collection(Constants.SET_COLLECTION).document(setId)
+            .collection(Constants.QUESTION_COLLECTION)
+            .addSnapshotListener(questionChangeEventListener).remove()
     }
 
     private fun getRealtimeCategories() {
@@ -136,7 +190,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addCategoryToFirebase(): Boolean {
 
-        if (!isValidateCategory()) {
+        if (!isValidCategory()) {
             return false
         }
 
@@ -157,7 +211,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return true
     }
 
-    private fun isValidateCategory(): Boolean {
+    private fun isValidCategory(): Boolean {
         if (categoryNameToAddCategory.value == null || categoryNameToAddCategory.value!!.trim().isEmpty()) {
             Toast.makeText(getApplication(), "Enter valid category name", Toast.LENGTH_SHORT).show()
             return false
@@ -189,7 +243,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun addNewSetToFirebase(categoryId: String, topicId: String, setNumberString: String) {
-        if (setNumberString.isEmpty()){
+        if (setNumberString.isEmpty()) {
             Toast.makeText(getApplication(), "Invalid Set Number!! try again", Toast.LENGTH_SHORT).show()
             return
         }
@@ -206,6 +260,66 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             .addOnFailureListener {
                 Toast.makeText(getApplication(), "Failed to add set", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    fun addQuestionToFirebase(categoryId: String, topicId: String, setId: String): Boolean {
+
+        if (!isValidQuestion()) {
+            return false
+        }
+
+        val question = hashMapOf(
+            Constants.QUESTION_QUESTION_FIELD to question.value!!.trim(),
+            Constants.QUESTION_OPTION_1_FIELD to option1.value!!.trim(),
+            Constants.QUESTION_OPTION_2_FIELD to option2.value!!.trim(),
+            Constants.QUESTION_OPTION_3_FIELD to option3.value!!.trim(),
+            Constants.QUESTION_OPTION_4_FIELD to option4.value!!.trim(),
+            Constants.QUESTION_CORRECT_ANSWER_FIELD to correctAnswer.value!!
+        )
+
+        db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId)
+            .collection(Constants.TOPIC_COLLECTION).document(topicId)
+            .collection(Constants.SET_COLLECTION).document(setId)
+            .collection(Constants.QUESTION_COLLECTION)
+            .add(question)
+            .addOnSuccessListener { documentReference ->
+                Toast.makeText(getApplication(), "Successfully added", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(getApplication(), "Failed to add question", Toast.LENGTH_SHORT).show()
+            }
+
+        return true
+    }
+
+    private fun isValidQuestion(): Boolean {
+        if (question.value == null || question.value!!.trim().isEmpty()){
+            Toast.makeText(getApplication(), "Enter valid question", Toast.LENGTH_SHORT).show()
+            return false
+        }else if (option1.value == null || option1.value!!.trim().isEmpty()){
+            Toast.makeText(getApplication(), "Enter valid option1", Toast.LENGTH_SHORT).show()
+            return false
+        }else if (option2.value == null || option2.value!!.trim().isEmpty()){
+            Toast.makeText(getApplication(), "Enter valid option2", Toast.LENGTH_SHORT).show()
+            return false
+        }else if (option3.value == null || option3.value!!.trim().isEmpty()){
+            Toast.makeText(getApplication(), "Enter valid option3", Toast.LENGTH_SHORT).show()
+            return false
+        }else if (option4.value == null || option4.value!!.trim().isEmpty()){
+            Toast.makeText(getApplication(), "Enter valid option4", Toast.LENGTH_SHORT).show()
+            return false
+        }else{
+            return true
+        }
+    }
+
+    fun addQuestionFinished() {
+        question.value = ""
+        option1.value = ""
+        option2.value = ""
+        option3.value = ""
+        option4.value = ""
+        correctAnswer.value = 0
     }
 
 }

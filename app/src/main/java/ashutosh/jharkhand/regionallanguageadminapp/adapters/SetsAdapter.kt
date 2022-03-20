@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ashutosh.jharkhand.regionallanguageadminapp.databinding.ListItemSetBinding
 import ashutosh.jharkhand.regionallanguageadminapp.models.Set
 
-class SetsAdapter: RecyclerView.Adapter<SetsAdapter.ViewHolder>() {
+class SetsAdapter(private val setClickListener: SetClickListener): RecyclerView.Adapter<SetsAdapter.ViewHolder>() {
 
     private var sets: List<Set> = ArrayList()
 
@@ -21,7 +21,7 @@ class SetsAdapter: RecyclerView.Adapter<SetsAdapter.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(sets[position])
+        holder.bind(sets[position], setClickListener)
     }
 
     override fun getItemCount(): Int {
@@ -37,10 +37,17 @@ class SetsAdapter: RecyclerView.Adapter<SetsAdapter.ViewHolder>() {
             }
         }
 
-        fun bind(set: Set){
+        fun bind(set: Set, setClickListener: SetClickListener){
+            binding.set = set
+            binding.setClickListener = setClickListener
             val setText =  "Set-${set.number}"
             binding.topicName.text = setText
+
             binding.executePendingBindings()
         }
     }
+}
+
+class SetClickListener(val clickListener: (set: Set) -> Unit){
+    fun onClick(set: Set) = clickListener(set)
 }

@@ -2,16 +2,17 @@ package ashutosh.jharkhand.regionallanguageadminapp.screens
 
 import android.os.Bundle
 import android.text.InputType
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import ashutosh.jharkhand.regionallanguageadminapp.R
+import ashutosh.jharkhand.regionallanguageadminapp.adapters.SetClickListener
 import ashutosh.jharkhand.regionallanguageadminapp.adapters.SetsAdapter
 import ashutosh.jharkhand.regionallanguageadminapp.databinding.FragmentSetsBinding
 import ashutosh.jharkhand.regionallanguageadminapp.viewModel.MainViewModel
@@ -61,7 +62,16 @@ class SetsFragment : Fragment() {
     private fun setUpRecyclerView() {
         binding.setRecyclerView.setHasFixedSize(true)
 
-        val setsAdapter = SetsAdapter()
+        val setsAdapter = SetsAdapter(SetClickListener { set ->
+            findNavController().navigate(
+                SetsFragmentDirections.actionSetsFragmentToQuestionsFragment(
+                    set,
+                    args.topic,
+                    args.category,
+                    "Set-${set.number}"
+                )
+            )
+        })
         binding.setRecyclerView.adapter = setsAdapter
 
         viewModel.updateSets(args.category.id, args.topic.id)

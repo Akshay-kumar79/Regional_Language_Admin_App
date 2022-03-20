@@ -56,5 +56,42 @@
         <argument
             android:name="topicName"
             app:argType="string" />
+        <action
+            android:id="@+id/action_setsFragment_to_questionsFragment"
+            app:destination="@id/questionsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/questionsFragment"
+        android:name="ashutosh.jharkhand.regionallanguageadminapp.screens.QuestionsFragment"
+        android:label="QuestionsFragment" >
+        <action
+            android:id="@+id/action_questionsFragment_to_addQuestionFragment"
+            app:destination="@id/addQuestionFragment" />
+        <argument
+            android:name="set"
+            app:argType="ashutosh.jharkhand.regionallanguageadminapp.models.Set" />
+        <argument
+            android:name="topic"
+            app:argType="ashutosh.jharkhand.regionallanguageadminapp.models.Topic" />
+        <argument
+            android:name="category"
+            app:argType="ashutosh.jharkhand.regionallanguageadminapp.models.Category" />
+        <argument
+            android:name="setName"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/addQuestionFragment"
+        android:name="ashutosh.jharkhand.regionallanguageadminapp.screens.AddQuestionFragment"
+        android:label="AddQuestionFragment" >
+        <argument
+            android:name="set"
+            app:argType="ashutosh.jharkhand.regionallanguageadminapp.models.Set" />
+        <argument
+            android:name="topic"
+            app:argType="ashutosh.jharkhand.regionallanguageadminapp.models.Topic" />
+        <argument
+            android:name="category"
+            app:argType="ashutosh.jharkhand.regionallanguageadminapp.models.Category" />
     </fragment>
 </navigation>

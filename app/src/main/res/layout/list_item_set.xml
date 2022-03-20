@@ -4,7 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
+        <variable
+            name="set"
+            type="ashutosh.jharkhand.regionallanguageadminapp.models.Set" />
+        <variable
+            name="setClickListener"
+            type="ashutosh.jharkhand.regionallanguageadminapp.adapters.SetClickListener" />
     </data>
 
     <FrameLayout
@@ -13,6 +18,7 @@
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
+            android:onClick="@{() -> setClickListener.onClick(set)}"
             android:layout_height="70dp"
             android:layout_margin="8dp"
             app:cardCornerRadius="8dp">

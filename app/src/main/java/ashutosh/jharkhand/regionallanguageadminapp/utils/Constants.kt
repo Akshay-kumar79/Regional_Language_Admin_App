@@ -12,4 +12,14 @@ object Constants {
     const val SET_COLLECTION = "sets"
     const val SET_NUMBER_FIELD = "set_number"
 
+    const val QUESTION_COLLECTION = "questions"
+    const val QUESTION_QUESTION_FIELD = "ques"
+    const val QUESTION_OPTION_1_FIELD = "opt1"
+    const val QUESTION_OPTION_2_FIELD = "opt2"
+    const val QUESTION_OPTION_3_FIELD = "opt3"
+    const val QUESTION_OPTION_4_FIELD = "opt4"
+    const val QUESTION_CORRECT_ANSWER_FIELD = "correct_answer"
+
+
+
 }
