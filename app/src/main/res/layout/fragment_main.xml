@@ -38,7 +38,6 @@
             android:src="@drawable/ic_baseline_add_24"
             android:layout_marginBottom="16dp"
             app:tint="@android:color/white"
-            android:text="@string/add_category"
             android:contentDescription="@string/add_category" />
 
     </FrameLayout>

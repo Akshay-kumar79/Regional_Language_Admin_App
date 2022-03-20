@@ -6,9 +6,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import ashutosh.jharkhand.regionallanguageadminapp.models.Category
+import ashutosh.jharkhand.regionallanguageadminapp.models.Topic
 import ashutosh.jharkhand.regionallanguageadminapp.utils.Constants
+import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlin.collections.ArrayList
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -22,25 +26,64 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val categories: LiveData<List<Category>>
         get() = _categories
 
-    val categoryName = MutableLiveData<String>()
+    private val _currentTopics = MutableLiveData<List<Topic>>()
+    val currentTopics: LiveData<List<Topic>>
+    get() = _currentTopics
+
+    val categoryNameToAddCategory = MutableLiveData<String>()
+
+    private val topicChangeEventListener = EventListener<QuerySnapshot>{snapshot, error ->
+        if (error != null) {
+            Toast.makeText(getApplication(), error.message, Toast.LENGTH_SHORT).show()
+            return@EventListener
+        }
+
+        if (snapshot != null) {
+            val newTopics = ArrayList<Topic>()
+            val documents = snapshot.documents
+            for (document in documents) {
+                newTopics.add(
+                    Topic(
+                        document.id,
+                        document.getString(Constants.TOPIC_NAME_FIELD) ?: ""
+                    )
+                )
+            }
+            _currentTopics.value = newTopics
+        }
+    }
 
     init {
         getRealtimeCategories()
     }
 
+    fun updateTopics(categoryId: String) {
+        db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId).collection(Constants.TOPIC_COLLECTION)
+            .addSnapshotListener(topicChangeEventListener)
+    }
+
+    fun removeTopicSnapshotListener(categoryId: String) {
+        db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId).collection(Constants.TOPIC_COLLECTION)
+            .addSnapshotListener(topicChangeEventListener).remove()
+    }
+
     private fun getRealtimeCategories() {
         db.collection(Constants.CATEGORIES_COLLECTION).addSnapshotListener { snapshot, error ->
-            if (error != null){
+            if (error != null) {
                 Toast.makeText(getApplication(), error.message, Toast.LENGTH_SHORT).show()
                 return@addSnapshotListener
             }
             if (snapshot != null) {
                 val documents = snapshot.documents
                 val newCategories = ArrayList<Category>()
-                for (document in documents){
-                    newCategories.add(Category(document.id,
-                        document.getString(Constants.CATEGORIES_NAME_FIELD)?:"",
-                        document.getString(Constants.CATEGORIES_IMAGE_FIELD)?:""))
+                for (document in documents) {
+                    newCategories.add(
+                        Category(
+                            document.id,
+                            document.getString(Constants.CATEGORIES_NAME_FIELD) ?: "",
+                            document.getString(Constants.CATEGORIES_IMAGE_FIELD) ?: ""
+                        )
+                    )
                 }
                 _categories.value = newCategories
             }
@@ -52,7 +95,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun addCategoryFinished() {
-        categoryName.value = ""
+        categoryNameToAddCategory.value = ""
         _selectedImageInAddCategory.value = ""
     }
 
@@ -63,7 +106,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         val category = hashMapOf(
-            Constants.CATEGORIES_NAME_FIELD to categoryName.value!!.trim(),
+            Constants.CATEGORIES_NAME_FIELD to categoryNameToAddCategory.value!!.trim(),
             Constants.CATEGORIES_IMAGE_FIELD to selectedImageInAddCategory.value!!,
         )
 
@@ -80,7 +123,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun isValidateCategory(): Boolean {
-        if (categoryName.value == null || categoryName.value!!.trim().isEmpty()) {
+        if (categoryNameToAddCategory.value == null || categoryNameToAddCategory.value!!.trim().isEmpty()) {
             Toast.makeText(getApplication(), "Enter valid category name", Toast.LENGTH_SHORT).show()
             return false
         } else if (selectedImageInAddCategory.value == null || selectedImageInAddCategory.value!!.isEmpty()) {
@@ -90,5 +133,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return true
         }
     }
+
 
 }

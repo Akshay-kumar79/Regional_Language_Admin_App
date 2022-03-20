@@ -7,7 +7,7 @@ import ashutosh.jharkhand.regionallanguageadminapp.databinding.ListItemCategoryB
 import ashutosh.jharkhand.regionallanguageadminapp.models.Category
 import ashutosh.jharkhand.regionallanguageadminapp.utils.decodeImage
 
-class CategoryAdapter : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
+class CategoryAdapter(private val categoryClickListener: CategoryClickListener) : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
 
     var categoryList: List<Category> = ArrayList()
 
@@ -21,7 +21,7 @@ class CategoryAdapter : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(categoryList[position])
+        holder.bind(categoryList[position], categoryClickListener)
     }
 
     override fun getItemCount(): Int {
@@ -37,13 +37,19 @@ class CategoryAdapter : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
             }
         }
 
-        fun bind(category: Category) {
-            binding.name.text = category.name
-            if (category.image.isNotEmpty()) {
-                binding.image.setImageBitmap(decodeImage(category.image))
+        fun bind(category: Category, categoryClickListener: CategoryClickListener) {
+            binding.category = category
+            binding.categoryClickListener = categoryClickListener
+            binding.name.text = category.categoryName
+            if (category.categoryImage.isNotEmpty()) {
+                binding.image.setImageBitmap(decodeImage(category.categoryImage))
             }
             binding.executePendingBindings()
         }
     }
 
+}
+
+class CategoryClickListener(val clickListener: (category: Category) -> Unit){
+    fun onClick(category: Category) = clickListener(category)
 }

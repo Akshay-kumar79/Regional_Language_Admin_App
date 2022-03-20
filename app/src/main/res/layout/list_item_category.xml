@@ -4,7 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
+        <variable
+            name="category"
+            type="ashutosh.jharkhand.regionallanguageadminapp.models.Category" />
+        <variable
+            name="categoryClickListener"
+            type="ashutosh.jharkhand.regionallanguageadminapp.adapters.CategoryClickListener" />
     </data>
 
     <FrameLayout
@@ -15,6 +20,7 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:onClick="@{() -> categoryClickListener.onClick(category)}"
             android:layout_margin="4dp"
             app:cardCornerRadius="4dp">
 

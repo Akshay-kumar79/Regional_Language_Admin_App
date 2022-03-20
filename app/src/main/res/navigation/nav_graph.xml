@@ -12,6 +12,9 @@
         <action
             android:id="@+id/action_mainFragment_to_addCategoryFragment"
             app:destination="@id/addCategoryFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_topicFragment"
+            app:destination="@id/topicFragment" />
     </fragment>
     <fragment
         android:id="@+id/addCategoryFragment"
@@ -26,4 +29,15 @@
         android:id="@+id/iconSelectFragment"
         android:name="ashutosh.jharkhand.regionallanguageadminapp.screens.IconSelectFragment"
         android:label="Select Icon" />
+    <fragment
+        android:id="@+id/topicFragment"
+        android:name="ashutosh.jharkhand.regionallanguageadminapp.screens.TopicFragment"
+        android:label="{categoryName}" >
+        <argument
+            android:name="category"
+            app:argType="ashutosh.jharkhand.regionallanguageadminapp.models.Category" />
+        <argument
+            android:name="categoryName"
+            app:argType="string" />
+    </fragment>
 </navigation>

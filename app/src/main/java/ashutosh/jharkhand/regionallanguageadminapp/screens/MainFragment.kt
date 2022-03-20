@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import ashutosh.jharkhand.regionallanguageadminapp.R
 import ashutosh.jharkhand.regionallanguageadminapp.adapters.CategoryAdapter
+import ashutosh.jharkhand.regionallanguageadminapp.adapters.CategoryClickListener
 import ashutosh.jharkhand.regionallanguageadminapp.databinding.FragmentMainBinding
 import ashutosh.jharkhand.regionallanguageadminapp.models.Category
 import ashutosh.jharkhand.regionallanguageadminapp.utils.bitmapFromDrawable
@@ -46,27 +47,12 @@ class MainFragment : Fragment() {
     }
 
     private fun setUpRecyclerView() {
-        val categories = ArrayList<Category>()
-        categories.add(Category("id", "Maths", encodeImage(bitmapFromDrawable(R.drawable.asset_1, requireContext()))))
-        categories.add(Category("id", "English", encodeImage(ContextCompat.getDrawable(requireContext(), R.drawable.asset_2)!!.toBitmap())))
-        categories.add(Category("id", "Science", encodeImage(ContextCompat.getDrawable(requireContext(), R.drawable.asset_3)!!.toBitmap())))
-        categories.add(Category("id", "Sanskrit", encodeImage(BitmapFactory.decodeResource(requireContext().resources, R.drawable.asset_4))))
-        categories.add(Category("id", "Hindi", encodeImage(BitmapFactory.decodeResource(requireContext().resources, R.drawable.asset_5))))
-        categories.add(Category("id", "SST", encodeImage(BitmapFactory.decodeResource(requireContext().resources, R.drawable.asset_6))))
-        categories.add(Category("id", "Physics", encodeImage(BitmapFactory.decodeResource(requireContext().resources, R.drawable.asset_7))))
-        categories.add(Category("id", "Chemistry", encodeImage(BitmapFactory.decodeResource(requireContext().resources, R.drawable.asset_8))))
-        categories.add(Category("id", "Biology", encodeImage(BitmapFactory.decodeResource(requireContext().resources, R.drawable.asset_9))))
-        categories.add(Category("id", "Physical education", encodeImage(BitmapFactory.decodeResource(requireContext().resources, R.drawable.asset_10))))
-        categories.add(Category("id", "Computer science", encodeImage(BitmapFactory.decodeResource(requireContext().resources, R.drawable.asset_11))))
-        categories.add(Category("id", "Computer graphics", encodeImage(BitmapFactory.decodeResource(requireContext().resources, R.drawable.asset_12))))
-        categories.add(Category("id", "Linux OS", encodeImage(BitmapFactory.decodeResource(requireContext().resources, R.drawable.asset_13))))
-
-
         binding.categoryRecyclerView.setHasFixedSize(true)
 
-        val categoryAdapter = CategoryAdapter()
+        val categoryAdapter = CategoryAdapter(CategoryClickListener { category ->
+            findNavController().navigate(MainFragmentDirections.actionMainFragmentToTopicFragment(category, category.categoryName))
+        })
         binding.categoryRecyclerView.adapter = categoryAdapter
-        //categoryAdapter.setData(categories)
     }
 
 
