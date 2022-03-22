@@ -11,8 +11,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import ashutosh.jharkhand.regionallanguageadminapp.R
+import ashutosh.jharkhand.regionallanguageadminapp.adapters.EmptyDataObserver
 import ashutosh.jharkhand.regionallanguageadminapp.adapters.TopicAdapter
 import ashutosh.jharkhand.regionallanguageadminapp.adapters.TopicClickListener
+import ashutosh.jharkhand.regionallanguageadminapp.adapters.TopicLongClickListener
 import ashutosh.jharkhand.regionallanguageadminapp.databinding.FragmentTopicBinding
 import ashutosh.jharkhand.regionallanguageadminapp.viewModel.MainViewModel
 
@@ -60,10 +62,27 @@ class TopicFragment : Fragment() {
     private fun setUpRecyclerView() {
         binding.topicRecyclerView.setHasFixedSize(true)
 
-        val topicAdapter = TopicAdapter(args.category.categoryImage, TopicClickListener{ topic ->
-            findNavController().navigate(TopicFragmentDirections.actionTopicFragmentToSetsFragment(topic, args.category, topic.topicName))
-        })
+        val topicAdapter = TopicAdapter(args.category.categoryImage,
+            TopicClickListener { topic ->
+                findNavController().navigate(TopicFragmentDirections.actionTopicFragmentToSetsFragment(topic, args.category, topic.topicName))
+            },
+            TopicLongClickListener { topic ->
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Delete topic")
+                    .setMessage("Are you sure you want to delete this topic?")
+                    .setPositiveButton("Yes") { dialog, which ->
+                        viewModel.deleteTopic(args.category ,topic)
+                    }
+                    .setNegativeButton("No", null)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show()
+                true
+            }
+        )
         binding.topicRecyclerView.adapter = topicAdapter
+
+        val emptyDataObserver = EmptyDataObserver(binding.topicRecyclerView, binding.emptyTextView, binding.longClickText)
+        topicAdapter.registerAdapterDataObserver(emptyDataObserver)
 
         viewModel.updateTopics(args.category.id)
     }

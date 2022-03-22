@@ -7,7 +7,10 @@ import ashutosh.jharkhand.regionallanguageadminapp.databinding.ListItemCategoryB
 import ashutosh.jharkhand.regionallanguageadminapp.models.Category
 import ashutosh.jharkhand.regionallanguageadminapp.utils.decodeImage
 
-class CategoryAdapter(private val categoryClickListener: CategoryClickListener) : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
+class CategoryAdapter(
+    private val categoryClickListener: CategoryClickListener,
+    private val categoryLongClickListener: CategoryLongClickListener
+) : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
 
     var categoryList: List<Category> = ArrayList()
 
@@ -21,7 +24,7 @@ class CategoryAdapter(private val categoryClickListener: CategoryClickListener) 
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(categoryList[position], categoryClickListener)
+        holder.bind(categoryList[position], categoryClickListener, categoryLongClickListener)
     }
 
     override fun getItemCount(): Int {
@@ -37,8 +40,9 @@ class CategoryAdapter(private val categoryClickListener: CategoryClickListener) 
             }
         }
 
-        fun bind(category: Category, categoryClickListener: CategoryClickListener) {
+        fun bind(category: Category, categoryClickListener: CategoryClickListener, categoryLongClickListener: CategoryLongClickListener) {
             binding.category = category
+            binding.categoryLongClickListener = categoryLongClickListener
             binding.categoryClickListener = categoryClickListener
             binding.name.text = category.categoryName
             if (category.categoryImage.isNotEmpty()) {
@@ -50,6 +54,10 @@ class CategoryAdapter(private val categoryClickListener: CategoryClickListener) 
 
 }
 
-class CategoryClickListener(val clickListener: (category: Category) -> Unit){
+class CategoryClickListener(val clickListener: (category: Category) -> Unit) {
     fun onClick(category: Category) = clickListener(category)
+}
+
+class CategoryLongClickListener(val longClickListener: (category: Category) -> Boolean) {
+    fun onClick(category: Category) = longClickListener(category)
 }

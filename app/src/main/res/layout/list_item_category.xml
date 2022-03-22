@@ -10,6 +10,9 @@
         <variable
             name="categoryClickListener"
             type="ashutosh.jharkhand.regionallanguageadminapp.adapters.CategoryClickListener" />
+        <variable
+            name="categoryLongClickListener"
+            type="ashutosh.jharkhand.regionallanguageadminapp.adapters.CategoryLongClickListener" />
     </data>
 
     <FrameLayout
@@ -21,6 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="@{() -> categoryClickListener.onClick(category)}"
+            android:onLongClick="@{() -> categoryLongClickListener.onClick(category)}"
             android:layout_margin="4dp"
             app:cardCornerRadius="4dp">
 

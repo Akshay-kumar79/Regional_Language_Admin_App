@@ -10,10 +10,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import ashutosh.jharkhand.regionallanguageadminapp.R
-import ashutosh.jharkhand.regionallanguageadminapp.adapters.QuestionAdapter
-import ashutosh.jharkhand.regionallanguageadminapp.adapters.TopicAdapter
-import ashutosh.jharkhand.regionallanguageadminapp.adapters.TopicClickListener
+import ashutosh.jharkhand.regionallanguageadminapp.adapters.*
 import ashutosh.jharkhand.regionallanguageadminapp.databinding.FragmentAddCategoryBinding
 import ashutosh.jharkhand.regionallanguageadminapp.databinding.FragmentQuestionsBinding
 import ashutosh.jharkhand.regionallanguageadminapp.viewModel.MainViewModel
@@ -51,8 +50,22 @@ class QuestionsFragment : Fragment() {
     private fun setUpRecyclerView() {
         binding.questionRecyclerView.setHasFixedSize(true)
 
-        val questionAdapter = QuestionAdapter()
+        val questionAdapter = QuestionAdapter(QuestionLongClickListener { question ->
+            AlertDialog.Builder(requireContext())
+                .setTitle("Delete Question")
+                .setMessage("Are you sure you want to delete this Question?")
+                .setPositiveButton("Yes") { dialog, which ->
+                    viewModel.deleteQuestion(args.category, args.topic , args.set, question)
+                }
+                .setNegativeButton("No", null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show()
+            true
+        })
         binding.questionRecyclerView.adapter = questionAdapter
+
+        val emptyDataObserver = EmptyDataObserver(binding.questionRecyclerView, binding.emptyTextView, binding.longClickText)
+        questionAdapter.registerAdapterDataObserver(emptyDataObserver)
 
         viewModel.updateQuestions(args.category.id, args.topic.id, args.set.id)
     }

@@ -7,7 +7,10 @@ import androidx.recyclerview.widget.RecyclerView
 import ashutosh.jharkhand.regionallanguageadminapp.databinding.ListItemSetBinding
 import ashutosh.jharkhand.regionallanguageadminapp.models.Set
 
-class SetsAdapter(private val setClickListener: SetClickListener): RecyclerView.Adapter<SetsAdapter.ViewHolder>() {
+class SetsAdapter(
+    private val setClickListener: SetClickListener,
+    private val setLongClickListener: SetLongClickListener
+    ): RecyclerView.Adapter<SetsAdapter.ViewHolder>() {
 
     private var sets: List<Set> = ArrayList()
 
@@ -21,7 +24,7 @@ class SetsAdapter(private val setClickListener: SetClickListener): RecyclerView.
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(sets[position], setClickListener)
+        holder.bind(sets[position], setClickListener, setLongClickListener)
     }
 
     override fun getItemCount(): Int {
@@ -37,9 +40,10 @@ class SetsAdapter(private val setClickListener: SetClickListener): RecyclerView.
             }
         }
 
-        fun bind(set: Set, setClickListener: SetClickListener){
+        fun bind(set: Set, setClickListener: SetClickListener, setLongClickListener: SetLongClickListener){
             binding.set = set
             binding.setClickListener = setClickListener
+            binding.setLongClickListener = setLongClickListener
             val setText =  "Set-${set.number}"
             binding.topicName.text = setText
 
@@ -50,4 +54,8 @@ class SetsAdapter(private val setClickListener: SetClickListener): RecyclerView.
 
 class SetClickListener(val clickListener: (set: Set) -> Unit){
     fun onClick(set: Set) = clickListener(set)
+}
+
+class SetLongClickListener(val longClickListener: (set: Set) -> Boolean){
+    fun onLongClick(set: Set) = longClickListener(set)
 }

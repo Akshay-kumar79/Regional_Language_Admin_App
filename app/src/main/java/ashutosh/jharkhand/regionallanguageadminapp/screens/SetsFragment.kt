@@ -12,7 +12,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import ashutosh.jharkhand.regionallanguageadminapp.R
+import ashutosh.jharkhand.regionallanguageadminapp.adapters.EmptyDataObserver
 import ashutosh.jharkhand.regionallanguageadminapp.adapters.SetClickListener
+import ashutosh.jharkhand.regionallanguageadminapp.adapters.SetLongClickListener
 import ashutosh.jharkhand.regionallanguageadminapp.adapters.SetsAdapter
 import ashutosh.jharkhand.regionallanguageadminapp.databinding.FragmentSetsBinding
 import ashutosh.jharkhand.regionallanguageadminapp.viewModel.MainViewModel
@@ -62,17 +64,34 @@ class SetsFragment : Fragment() {
     private fun setUpRecyclerView() {
         binding.setRecyclerView.setHasFixedSize(true)
 
-        val setsAdapter = SetsAdapter(SetClickListener { set ->
-            findNavController().navigate(
-                SetsFragmentDirections.actionSetsFragmentToQuestionsFragment(
-                    set,
-                    args.topic,
-                    args.category,
-                    "Set-${set.number}"
+        val setsAdapter = SetsAdapter(
+            SetClickListener { set ->
+                findNavController().navigate(
+                    SetsFragmentDirections.actionSetsFragmentToQuestionsFragment(
+                        set,
+                        args.topic,
+                        args.category,
+                        "Set-${set.number}"
+                    )
                 )
-            )
-        })
+            },
+            SetLongClickListener { set ->
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Delete Set")
+                    .setMessage("Are you sure you want to delete this set?")
+                    .setPositiveButton("Yes") { dialog, which ->
+                        viewModel.deleteSet(args.category, args.topic ,set)
+                    }
+                    .setNegativeButton("No", null)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show()
+                true
+            }
+        )
         binding.setRecyclerView.adapter = setsAdapter
+
+        val emptyDataObserver = EmptyDataObserver(binding.setRecyclerView, binding.emptyTextView, binding.longClickText)
+        setsAdapter.registerAdapterDataObserver(emptyDataObserver)
 
         viewModel.updateSets(args.category.id, args.topic.id)
     }

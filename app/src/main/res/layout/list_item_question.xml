@@ -4,7 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
+        <variable
+            name="questionObject"
+            type="ashutosh.jharkhand.regionallanguageadminapp.models.Question" />
+        <variable
+            name="questionLongClickListener"
+            type="ashutosh.jharkhand.regionallanguageadminapp.adapters.QuestionLongClickListener" />
     </data>
 
     <FrameLayout
@@ -15,6 +20,7 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:onLongClick="@{() -> questionLongClickListener.onLongClick(questionObject)}"
             android:layout_margin="4dp"
             app:cardCornerRadius="4dp">
 

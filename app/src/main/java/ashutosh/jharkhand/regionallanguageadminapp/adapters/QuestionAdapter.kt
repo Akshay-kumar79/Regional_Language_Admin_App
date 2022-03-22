@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ashutosh.jharkhand.regionallanguageadminapp.databinding.ListItemQuestionBinding
 import ashutosh.jharkhand.regionallanguageadminapp.models.Question
 
-class QuestionAdapter: RecyclerView.Adapter<QuestionAdapter.ViewHolder>() {
+class QuestionAdapter(private val questionLongClickListener: QuestionLongClickListener): RecyclerView.Adapter<QuestionAdapter.ViewHolder>() {
 
     private var questions: List<Question> = ArrayList()
 
@@ -21,7 +21,7 @@ class QuestionAdapter: RecyclerView.Adapter<QuestionAdapter.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(questions[position])
+        holder.bind(questions[position], questionLongClickListener)
     }
 
     override fun getItemCount(): Int {
@@ -37,7 +37,9 @@ class QuestionAdapter: RecyclerView.Adapter<QuestionAdapter.ViewHolder>() {
             }
         }
 
-        fun bind(question: Question){
+        fun bind(question: Question, questionLongClickListener: QuestionLongClickListener){
+            binding.questionObject = question
+            binding.questionLongClickListener = questionLongClickListener
             binding.question.text = question.question
             binding.option1.text = question.opt1
             binding.option2.text = question.opt2
@@ -60,6 +62,44 @@ class QuestionAdapter: RecyclerView.Adapter<QuestionAdapter.ViewHolder>() {
 
             binding.executePendingBindings()
         }
+    }
+
+}
+
+class QuestionLongClickListener(val longClickListener: (question: Question) -> Boolean){
+    fun onLongClick(question: Question) = longClickListener(question)
+}
+
+class EmptyDataObserver constructor(rv: RecyclerView?, ev: View?, fv: View?): RecyclerView.AdapterDataObserver() {
+
+    private var emptyView: View? = null
+    private var recyclerView: RecyclerView? = null
+    private var fillView: View? = null
+
+    init {
+        recyclerView = rv
+        emptyView = ev
+        fillView = fv
+        checkIfEmpty()
+    }
+
+
+    private fun checkIfEmpty() {
+        if (emptyView != null && recyclerView!!.adapter != null && fillView != null) {
+            val emptyViewVisible = recyclerView!!.adapter!!.itemCount == 0
+            emptyView!!.visibility = if (emptyViewVisible) View.VISIBLE else View.GONE
+            recyclerView!!.visibility = if (emptyViewVisible) View.GONE else View.VISIBLE
+            fillView!!.visibility = if (emptyViewVisible) View.GONE else View.VISIBLE
+        }
+    }
+
+    override fun onChanged() {
+        super.onChanged()
+        checkIfEmpty()
+    }
+
+    override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
+        super.onItemRangeChanged(positionStart, itemCount)
     }
 
 }

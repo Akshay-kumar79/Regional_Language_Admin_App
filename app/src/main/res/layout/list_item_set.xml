@@ -10,6 +10,9 @@
         <variable
             name="setClickListener"
             type="ashutosh.jharkhand.regionallanguageadminapp.adapters.SetClickListener" />
+        <variable
+            name="setLongClickListener"
+            type="ashutosh.jharkhand.regionallanguageadminapp.adapters.SetLongClickListener" />
     </data>
 
     <FrameLayout
@@ -19,6 +22,7 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:onClick="@{() -> setClickListener.onClick(set)}"
+            android:onLongClick="@{() -> setLongClickListener.onLongClick(set)}"
             android:layout_height="70dp"
             android:layout_margin="8dp"
             app:cardCornerRadius="8dp">

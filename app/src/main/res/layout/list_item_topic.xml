@@ -10,6 +10,9 @@
         <variable
             name="topicClickListener"
             type="ashutosh.jharkhand.regionallanguageadminapp.adapters.TopicClickListener" />
+        <variable
+            name="topicLongClickListener"
+            type="ashutosh.jharkhand.regionallanguageadminapp.adapters.TopicLongClickListener" />
     </data>
 
     <FrameLayout
@@ -19,6 +22,7 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:onClick="@{() -> topicClickListener.onClick(topic)}"
+            android:onLongClick="@{() -> topicLongClickListener.onLongClick(topic)}"
             android:layout_height="80dp"
             android:layout_margin="8dp"
             app:cardCornerRadius="8dp">

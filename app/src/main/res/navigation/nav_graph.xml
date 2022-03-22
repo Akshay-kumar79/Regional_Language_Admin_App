@@ -63,7 +63,7 @@
     <fragment
         android:id="@+id/questionsFragment"
         android:name="ashutosh.jharkhand.regionallanguageadminapp.screens.QuestionsFragment"
-        android:label="QuestionsFragment" >
+        android:label="Questions">
         <action
             android:id="@+id/action_questionsFragment_to_addQuestionFragment"
             app:destination="@id/addQuestionFragment" />

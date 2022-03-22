@@ -8,7 +8,11 @@ import ashutosh.jharkhand.regionallanguageadminapp.databinding.ListItemTopicBind
 import ashutosh.jharkhand.regionallanguageadminapp.models.Topic
 import ashutosh.jharkhand.regionallanguageadminapp.utils.decodeImage
 
-class TopicAdapter(private val categoryImage: String, private val topicClickListener: TopicClickListener)
+class TopicAdapter(
+    private val categoryImage: String,
+    private val topicClickListener: TopicClickListener,
+    private val topicLongClickListener: TopicLongClickListener
+    )
     : RecyclerView.Adapter<TopicAdapter.ViewHolder>() {
 
     private var topics: List<Topic> = ArrayList()
@@ -23,7 +27,7 @@ class TopicAdapter(private val categoryImage: String, private val topicClickList
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(topics[position], categoryImage, topicClickListener)
+        holder.bind(topics[position], categoryImage, topicClickListener, topicLongClickListener)
     }
 
     override fun getItemCount(): Int {
@@ -39,9 +43,10 @@ class TopicAdapter(private val categoryImage: String, private val topicClickList
             }
         }
 
-        fun bind(topic: Topic, categoryImage: String, topicClickListener: TopicClickListener){
+        fun bind(topic: Topic, categoryImage: String, topicClickListener: TopicClickListener, topicLongClickListener: TopicLongClickListener){
             binding.topic = topic
             binding.topicClickListener = topicClickListener
+            binding.topicLongClickListener = topicLongClickListener
             binding.topicName.text = topic.topicName
             if (categoryImage.isNotEmpty()) {
                 binding.topicImage.setImageBitmap(decodeImage(categoryImage))
@@ -53,4 +58,8 @@ class TopicAdapter(private val categoryImage: String, private val topicClickList
 
 class TopicClickListener(val clickListener: (topic: Topic) -> Unit){
     fun onClick(topic: Topic) = clickListener(topic)
+}
+
+class TopicLongClickListener(val longClickListener: (topic: Topic) -> Boolean){
+    fun onLongClick(topic: Topic) = longClickListener(topic)
 }

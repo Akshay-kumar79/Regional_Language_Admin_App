@@ -15,6 +15,8 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import java.util.*
+import kotlin.collections.ArrayList
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -62,7 +64,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 newTopics.add(
                     Topic(
                         document.id,
-                        document.getString(Constants.TOPIC_NAME_FIELD) ?: ""
+                        document.getString(Constants.TOPIC_NAME_FIELD) ?: "",
+                        document.getLong(Constants.TOPIC_TIME_FIELD)?: 0
                     )
                 )
             }
@@ -105,6 +108,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         document.getString(Constants.QUESTION_OPTION_3_FIELD)?: "",
                         document.getString(Constants.QUESTION_OPTION_4_FIELD)?: "",
                         (document.get(Constants.QUESTION_CORRECT_ANSWER_FIELD) as Long?)?.toInt() ?: 0,
+                        document.getLong(Constants.QUESTION_TIME_FIELD)?: 0
                     )
                 )
             }
@@ -117,7 +121,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateTopics(categoryId: String) {
-        db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId).collection(Constants.TOPIC_COLLECTION)
+        db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId)
+            .collection(Constants.TOPIC_COLLECTION).orderBy(Constants.TOPIC_TIME_FIELD)
             .addSnapshotListener(topicChangeEventListener)
     }
 
@@ -133,19 +138,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId)
             .collection(Constants.TOPIC_COLLECTION).document(topicId)
             .collection(Constants.SET_COLLECTION).document(setId)
-            .collection(Constants.QUESTION_COLLECTION)
+            .collection(Constants.QUESTION_COLLECTION).orderBy(Constants.QUESTION_TIME_FIELD)
             .addSnapshotListener(questionChangeEventListener)
     }
 
     fun removeTopicSnapshotListener(categoryId: String) {
         db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId).collection(Constants.TOPIC_COLLECTION)
             .addSnapshotListener(topicChangeEventListener).remove()
+        _currentTopics.value = emptyList()
     }
 
     fun removeSetSnapshotListener(categoryId: String, topicId: String) {
         db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId).collection(Constants.TOPIC_COLLECTION)
             .document(topicId).collection(Constants.SET_COLLECTION)
             .addSnapshotListener(setChangeEventListener).remove()
+        _currentSets.value = emptyList()
     }
 
     fun removeQuestionSnapshotListener(categoryId: String, topicId: String, setId: String) {
@@ -154,10 +161,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             .collection(Constants.SET_COLLECTION).document(setId)
             .collection(Constants.QUESTION_COLLECTION)
             .addSnapshotListener(questionChangeEventListener).remove()
+        _currentQuestion.value = emptyList()
     }
 
     private fun getRealtimeCategories() {
-        db.collection(Constants.CATEGORIES_COLLECTION).addSnapshotListener { snapshot, error ->
+        db.collection(Constants.CATEGORIES_COLLECTION).orderBy(Constants.CATEGORIES_TIME_FIELD)
+            .addSnapshotListener { snapshot, error ->
             if (error != null) {
                 Toast.makeText(getApplication(), error.message, Toast.LENGTH_SHORT).show()
                 return@addSnapshotListener
@@ -170,7 +179,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         Category(
                             document.id,
                             document.getString(Constants.CATEGORIES_NAME_FIELD) ?: "",
-                            document.getString(Constants.CATEGORIES_IMAGE_FIELD) ?: ""
+                            document.getString(Constants.CATEGORIES_IMAGE_FIELD) ?: "",
+                            document.getLong(Constants.CATEGORIES_TIME_FIELD)?: 0
                         )
                     )
                 }
@@ -197,6 +207,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val category = hashMapOf(
             Constants.CATEGORIES_NAME_FIELD to categoryNameToAddCategory.value!!.trim(),
             Constants.CATEGORIES_IMAGE_FIELD to selectedImageInAddCategory.value!!,
+            Constants.CATEGORIES_TIME_FIELD to System.currentTimeMillis()
         )
 
         db.collection(Constants.CATEGORIES_COLLECTION)
@@ -229,7 +240,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        val topic = hashMapOf(Constants.TOPIC_NAME_FIELD to topicName)
+        val topic = hashMapOf(
+            Constants.TOPIC_NAME_FIELD to topicName,
+            Constants.TOPIC_TIME_FIELD to System.currentTimeMillis()
+        )
 
         db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId)
             .collection(Constants.TOPIC_COLLECTION)
@@ -274,7 +288,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             Constants.QUESTION_OPTION_2_FIELD to option2.value!!.trim(),
             Constants.QUESTION_OPTION_3_FIELD to option3.value!!.trim(),
             Constants.QUESTION_OPTION_4_FIELD to option4.value!!.trim(),
-            Constants.QUESTION_CORRECT_ANSWER_FIELD to correctAnswer.value!!
+            Constants.QUESTION_CORRECT_ANSWER_FIELD to correctAnswer.value!!,
+            Constants.QUESTION_TIME_FIELD to System.currentTimeMillis()
         )
 
         db.collection(Constants.CATEGORIES_COLLECTION).document(categoryId)
@@ -320,6 +335,56 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         option3.value = ""
         option4.value = ""
         correctAnswer.value = 0
+    }
+
+    fun deleteCategory(category: Category) {
+        db.collection(Constants.CATEGORIES_COLLECTION).document(category.id)
+            .delete()
+            .addOnSuccessListener {
+                Toast.makeText(getApplication(), "Successfully deleted", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(getApplication(), "Failed to delete", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    fun deleteTopic(category: Category , topic: Topic) {
+        db.collection(Constants.CATEGORIES_COLLECTION).document(category.id)
+            .collection(Constants.TOPIC_COLLECTION).document(topic.id)
+            .delete()
+            .addOnSuccessListener {
+                Toast.makeText(getApplication(), "Successfully deleted", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(getApplication(), "Failed to delete", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    fun deleteSet(category: Category, topic: Topic, set: Set) {
+        db.collection(Constants.CATEGORIES_COLLECTION).document(category.id)
+            .collection(Constants.TOPIC_COLLECTION).document(topic.id)
+            .collection(Constants.SET_COLLECTION).document(set.id)
+            .delete()
+            .addOnSuccessListener {
+                Toast.makeText(getApplication(), "Successfully deleted", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(getApplication(), "Failed to delete", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    fun deleteQuestion(category: Category, topic: Topic, set: Set, question: Question) {
+        db.collection(Constants.CATEGORIES_COLLECTION).document(category.id)
+            .collection(Constants.TOPIC_COLLECTION).document(topic.id)
+            .collection(Constants.SET_COLLECTION).document(set.id)
+            .collection(Constants.QUESTION_COLLECTION).document(question.id)
+            .delete()
+            .addOnSuccessListener {
+                Toast.makeText(getApplication(), "Successfully deleted", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(getApplication(), "Failed to delete", Toast.LENGTH_SHORT).show()
+            }
     }
 
 }

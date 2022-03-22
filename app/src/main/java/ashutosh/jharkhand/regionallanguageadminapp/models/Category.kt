@@ -7,5 +7,6 @@ import kotlinx.android.parcel.Parcelize
 data class Category(
     val id: String,
     val categoryName: String,
-    val categoryImage: String
+    val categoryImage: String,
+    val date: Long
 ): Parcelable
