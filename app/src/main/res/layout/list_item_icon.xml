@@ -18,6 +18,7 @@
             android:id="@+id/icon"
             android:layout_width="match_parent"
             android:layout_height="80dp"
+            android:foreground="?selectableItemBackground"
             android:onClick="@{() -> iconClickListener.onClick(drawableId)}"
             android:background="#F3F3F3"
             android:scaleType="fitCenter"

@@ -23,6 +23,7 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:foreground="?selectableItemBackground"
             android:onClick="@{() -> categoryClickListener.onClick(category)}"
             android:onLongClick="@{() -> categoryLongClickListener.onClick(category)}"
             android:layout_margin="4dp"

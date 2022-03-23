@@ -20,6 +20,7 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:foreground="?selectableItemBackground"
             android:onLongClick="@{() -> questionLongClickListener.onLongClick(questionObject)}"
             android:layout_margin="4dp"
             app:cardCornerRadius="4dp">
